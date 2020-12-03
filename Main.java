@@ -298,7 +298,7 @@ public class Main {
             checkPassengerid.setInt(1,id);
             ResultSet Passidresult= checkPassengerid.executeQuery();
             if (!Passidresult.next()){
-                System.out.println("[ERROR] Unvalid ID");
+                System.out.println("[ERROR] Invalid ID");
                 valid=false;
             }
             else {
@@ -421,15 +421,42 @@ public class Main {
         SimpleDateFormat dateFormat= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Timestamp startstamp= null,endstamp= null;
         Date startDate,endDate;
+        boolean valid;
         
-        System.out.println("Please enter your ID.");
-        id= Integer.parseInt(inNextLine());
+        do{
+            valid=true;
+            System.out.println("Please enter your ID.");
+            try {
+                id= Integer.parseInt(inNextLine());
+            } catch (Exception e) {
+                id = -1;
+            }
+            PreparedStatement checkPassengerid= conn.prepareStatement("SELECT id FROM passengers P WHERE P.id=?");
+            checkPassengerid.setInt(1,id);
+            ResultSet Passidresult= checkPassengerid.executeQuery();
+            if (!Passidresult.next()){
+                System.out.println("[ERROR] Invalid ID");
+                valid=false;
+            }
+        }while (!valid);
+        //System.out.println("Please enter your ID.");
+        //id= Integer.parseInt(inNextLine());
         System.out.println("Please enter the start date.");
         userStartDate=inNextLine()+" 00:00:00";
         System.out.println("Please enter the end date.");
         userEndDate=inNextLine()+" 00:00:00";
-        System.out.println("Please enter the destination.");
-        destination=inNextLine();
+         do{
+            valid=true;
+            System.out.println("Please enter the destination.");
+            destination= inNextLine();
+            PreparedStatement checkLocation= conn.prepareStatement("SELECT name FROM taxi_stops T WHERE T.name=?");
+            checkLocation.setString(1,destination);
+            ResultSet rs= checkLocation.executeQuery();
+            if (!rs.next()) {System.out.println("[ERROR] Destination not found."); valid=false;}
+            checkLocation.close();
+        }while (!valid);
+        //System.out.println("Please enter the destination.");
+        //destination=inNextLine();
         startDate= dateFormat.parse(userStartDate);
         startstamp= new java.sql.Timestamp(startDate.getTime());
         endDate= dateFormat.parse(userEndDate);

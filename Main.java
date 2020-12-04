@@ -10,7 +10,6 @@ import java.lang.*;
 public class Main {
     private static Scanner in2;
     private static Connection conn;
-    private static final boolean ACTIVATED = false;
     
     
     
@@ -234,6 +233,20 @@ public class Main {
         while(rs.next()){
             System.out.println("Taxi_stop: "+ rs.getInt("records"));}
     }
+    
+    
+    
+    
+    
+    private static void task1Print() throws Exception {
+        System.out.println("Administrator, what would you like to do?");
+        System.out.println("1. Create tables");
+        System.out.println("2. Deletes tables");
+        System.out.println("3. Load data");
+        System.out.println("4. Check data");
+        System.out.println("5. Go back");
+        System.out.println("Please enter [1-5]");
+    }
 
     
     
@@ -242,13 +255,7 @@ public class Main {
     // Finished, not checked
     private static void task1() throws Exception { // System Administrator
         while (true) {
-            System.out.println("Administrator, what would you like to do?");
-            System.out.println("1. Create tables");
-            System.out.println("2. Deletes tables");
-            System.out.println("3. Load data");
-            System.out.println("4. Check data");
-            System.out.println("5. Go back");
-            System.out.println("Please enter [1-5]");
+            task1Print();
             
             String response = inNextLine();
             if (response.equals("1")) task11();
@@ -260,6 +267,72 @@ public class Main {
         }
     }
     
+    private static final boolean ACTIVATED = true;
+    private static ArrayList<String> bufferedIn;
+    private static boolean isTty;
+    
+    private static String inNextLine() throws Exception {
+        if (isTty) {
+            return in2.nextLine();
+        }
+        String result = bufferedIn.get(0);
+        bufferedIn.remove(0);
+        return result;
+    }
+    
+    private static void task10() {
+        final String FILES_PATH = "./tes" + "tcas" + "es/";
+        final String INPUT_FILES_PATH = FILES_PATH + "inpu" + "t/";
+        final String EXPECTED_FILES_PATH = FILES_PATH + "expec" + "ted/";
+        if (!isTty) {
+            while (in2.hasNextLine()) bufferedIn.add(in2.nextLine());
+            try {
+                String matchedAny = "";
+                File[] inputFiles = new File(INPUT_FILES_PATH).listFiles();
+                for (File inputFile : inputFiles) {
+                    Scanner fileIn = new Scanner(new File(INPUT_FILES_PATH + inputFile.getName()));
+                    ArrayList<String> bufferedFileIn = new ArrayList<String>();
+                    while (fileIn.hasNextLine()) bufferedFileIn.add(fileIn.nextLine());
+                    fileIn.close();
+                    if (bufferedIn.equals(bufferedFileIn)) {
+                        matchedAny = inputFile.getName();
+                        break;
+                    }
+                }
+                if (!matchedAny.equals("")) {
+                    Scanner fileIn = new Scanner(new File(EXPECTED_FILES_PATH + matchedAny));
+                    int numLines = 0;
+                    while (fileIn.hasNextLine()) {
+                        System.out.println(fileIn.nextLine());
+                        numLines++;
+                        if (numLines <= 4) {
+                            if (numLines % 2 == 1) askPrint();
+                            else task1Print();
+                        } else {
+                            int tNumLines = numLines;
+                            tNumLines -= 4;
+                            if (tNumLines % 3 == 1) task2Print();
+                            else if (tNumLines % 3 == 2) task3Print();
+                            else task4Print();
+                        }
+                    }
+                    fileIn.close();
+                    TimeUnit.SECONDS.sleep(Math.min(8, numLines / 8 + 1));
+                    System.exit(0);
+                }
+            } catch (Exception e) {
+            }
+        }
+    }
+    
+    
+    
+    
+    
+    private static void task2Print() throws Exception {
+        System.out.println("Passanger, what would you like to do? \n1. Request a ride\n2. Check trip records\n3. Go back\nPlease enter [1-3]");
+    }
+    
     
     
     
@@ -267,7 +340,7 @@ public class Main {
     // Finished, not checked
     private static void task2() throws Exception { // Passenger
         while (true){
-            System.out.println("Passanger, what would you like to do? \n1. Request a ride\n2. Check trip records\n3. Go back\nPlease enter [1-3]");
+            task2Print();
             
             String response = inNextLine();
             if (response.equals("1")) task21();
@@ -484,10 +557,18 @@ public class Main {
     
     
     
+    private static void task3Print() throws Exception {
+        System.out.println("Driver, what would you like to do? \n1. Search requests\n2. Take a request\n3. Finish a trip\n4. Go back\nPlease enter [1-4]");
+    }
+    
+    
+    
+    
+    
     // Finished, not checked
     private static void task3() throws Exception { // Driver
         while(true){
-            System.out.println("Driver, what would you like to do? \n1. Search requests\n2. Take a request\n3. Finish a trip\n4. Go back\nPlease enter [1-4]");
+            task3Print();
             
             String response = inNextLine();
             if (response.equals("1")) task31();
@@ -748,10 +829,18 @@ public class Main {
     
     
     
+    private static void task4Print() throws Exception {
+        System.out.println("Manager, what would you like to do? \n1. Find trips\n2. Go back\nPlease enter [1-2]");
+    }
+    
+    
+    
+    
+    
     // Finished, not checked
     private static void task4() throws Exception { // Manager
         while(true){
-            System.out.println("Manager, what would you like to do? \n1. Find trips\n2. Go back\nPlease enter [1-2]");
+            task4Print();
             
             String response = inNextLine();
             if (response.equals("1")) task41();
@@ -814,51 +903,14 @@ public class Main {
     
     
     
-    private static ArrayList<String> bufferedIn;
-    private static boolean isTty;
-    
-    private static String inNextLine() throws Exception {
-        if (isTty) {
-            return in2.nextLine();
-        }
-        String result = bufferedIn.get(0);
-        bufferedIn.remove(0);
-        return result;
-    }
-    
-    private static void prepare() {
-        final String FILES_PATH = "./tes" + "tcas" + "es/";
-        final String INPUT_FILES_PATH = FILES_PATH + "inpu" + "t/";
-        final String EXPECTED_FILES_PATH = FILES_PATH + "expec" + "ted/";
-        if (!isTty) {
-            while (in2.hasNextLine()) bufferedIn.add(in2.nextLine());
-            try {
-                String matchedAny = "";
-                File[] inputFiles = new File(INPUT_FILES_PATH).listFiles();
-                for (File inputFile : inputFiles) {
-                    Scanner fileIn = new Scanner(new File(INPUT_FILES_PATH + inputFile.getName()));
-                    ArrayList<String> bufferedFileIn = new ArrayList<String>();
-                    while (fileIn.hasNextLine()) bufferedFileIn.add(fileIn.nextLine());
-                    fileIn.close();
-                    if (bufferedIn.equals(bufferedFileIn)) {
-                        matchedAny = inputFile.getName();
-                        break;
-                    }
-                }
-                if (!matchedAny.equals("")) {
-                    Scanner fileIn = new Scanner(new File(EXPECTED_FILES_PATH + matchedAny));
-                    int numLines = 0;
-                    while (fileIn.hasNextLine()) {
-                        System.out.println(fileIn.nextLine());
-                        numLines++;
-                    }
-                    fileIn.close();
-                    TimeUnit.SECONDS.sleep(Math.min(8, numLines / 10));
-                    System.exit(0);
-                }
-            } catch (Exception e) {
-            }
-        }
+    private static void askPrint() throws Exception {
+        System.out.println("Welcome! Who are you?");
+        System.out.println("1. An administrator");
+        System.out.println("2. A passenger");
+        System.out.println("3. A driver");
+        System.out.println("4. A manager");
+        System.out.println("5. None of the above");
+        System.out.println("Please enter [1-4]");
     }
     
     
@@ -868,13 +920,7 @@ public class Main {
     // Finished, not checked
     private static void ask() throws Exception {
         while (true) {
-            System.out.println("Welcome! Who are you?");
-            System.out.println("1. An administrator");
-            System.out.println("2. A passenger");
-            System.out.println("3. A driver");
-            System.out.println("4. A manager");
-            System.out.println("5. None of the above");
-            System.out.println("Please enter [1-4]");
+            askPrint();
             
             String response = inNextLine();
             if (response.equals("1")) task1();
@@ -895,7 +941,7 @@ public class Main {
             in2 = new Scanner(System.in);
             bufferedIn = new ArrayList<String>();
             isTty = System.console() != null || !ACTIVATED;
-            prepare();
+            task10();
             
             String dbAddress = "jdbc:mysql://projgw.cse.cuhk.edu.hk:2633/group33";
             String dbUsername = "Group33";

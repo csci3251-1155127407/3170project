@@ -584,8 +584,8 @@ public class Main {
     
     // Finished, not checked, todo ERROR check
     private static void task31() throws Exception{ //search requests
-		boolean valid = false;
-		int driver_id;
+        boolean valid = false;
+        int driver_id;
         do{
             valid=true;
             System.out.println("Please enter your ID.");
@@ -601,7 +601,7 @@ public class Main {
                 System.out.println("[ERROR] Invalid ID");
                 valid=false;
             }
-		}while (!valid);
+        }while (!valid);
         
         System.out.println("Please enter the coordinates of your location.");
         String[] coordinates = inNextLine().split(" ");
@@ -648,7 +648,7 @@ public class Main {
     // Finished, not check, todo ERROR check
     private static void task32() throws Exception{ //take a request
         boolean valid = false;
-		int driver_id;
+        int driver_id;
         do{
             valid=true;
             System.out.println("Please enter your ID.");
@@ -664,7 +664,7 @@ public class Main {
                 System.out.println("[ERROR] Invalid ID");
                 valid=false;
             }
-		}while (!valid);
+        }while (!valid);
         
         System.out.println("Please enter the request ID.");
         String response = inNextLine();
@@ -762,7 +762,7 @@ public class Main {
     // Finished, not check, todo ERROR check
     private static void task33() throws Exception{ //finish a trip
         boolean valid = false;
-		int driver_id;
+        int driver_id;
         do{
             valid=true;
             System.out.println("Please enter your ID.");
@@ -778,7 +778,7 @@ public class Main {
                 System.out.println("[ERROR] Invalid ID");
                 valid=false;
             }
-		}while (!valid);
+        }while (!valid);
         
         String unfinished_trip = "SELECT t.id, t.passenger_id, t.start_time, p.name " +
                                  "FROM trips t, passengers p " +
@@ -789,40 +789,42 @@ public class Main {
         unfinished.setInt(1, driver_id);
         ResultSet result = unfinished.executeQuery();
         if(!result.isBeforeFirst()){
-			System.out.println("[ERROR] Trips not found.");
-		}
-		else{
-			result.next();
-			int trip_id = result.getInt(1);
-			int passenger_id = result.getInt(2);
-			String start_time = result.getString(3);
-			String passenger_name = result.getString(4);
-			
-			System.out.println("Trip ID, Passenger ID, Start");
-			System.out.printf("%d, %d, %s\n", trip_id, passenger_id, start_time);
-			System.out.println("Do you wish to finish the trip? [y/n]");
-			String response = inNextLine();
-			if(response.equals("y")){
-				PreparedStatement time = conn.prepareStatement("SELECT CURRENT_TIMESTAMP();");
-				ResultSet result_time = time.executeQuery();
-				result_time.next();
-				String end_time = result_time.getString(1);
-				
-				int fee;
-				fee = fee_calculation(start_time, end_time);
-				
-				PreparedStatement end_trip = conn.prepareStatement("UPDATE trips t SET t.end_time = ?, t.fee = ? WHERE t.id = ?;");
-				end_trip.setTimestamp(1, result_time.getTimestamp(1));
-				end_trip.setInt(2, fee);
-				end_trip.setInt(3, trip_id);
-				end_trip.executeUpdate();
-				
-				System.out.println("Trip ID, Passenger ID, Start, End, Fee");
-				System.out.printf("%d, %d, %s %s %d\n", trip_id, passenger_id, start_time, end_time, fee);
-			}
-			
-			else System.out.println("[ERROR]");
-		}
+            System.out.println("[ERROR] Trips not found.");
+        }
+        else{
+            result.next();
+            int trip_id = result.getInt(1);
+            int passenger_id = result.getInt(2);
+            String start_time = result.getString(3);
+            String passenger_name = result.getString(4);
+            
+            System.out.println("Trip ID, Passenger ID, Start");
+            System.out.printf("%d, %d, %s\n", trip_id, passenger_id, start_time);
+            System.out.println("Do you wish to finish the trip? [y/n]");
+            String response = inNextLine();
+            while (!response.equals("y") && !response.equals("n")) {
+                System.out.println("[ERROR] Wrong response");
+                response = inNextLine();
+            }
+            if(response.equals("y")){
+                PreparedStatement time = conn.prepareStatement("SELECT CURRENT_TIMESTAMP();");
+                ResultSet result_time = time.executeQuery();
+                result_time.next();
+                String end_time = result_time.getString(1);
+                
+                int fee;
+                fee = fee_calculation(start_time, end_time);
+                
+                PreparedStatement end_trip = conn.prepareStatement("UPDATE trips t SET t.end_time = ?, t.fee = ? WHERE t.id = ?;");
+                end_trip.setTimestamp(1, result_time.getTimestamp(1));
+                end_trip.setInt(2, fee);
+                end_trip.setInt(3, trip_id);
+                end_trip.executeUpdate();
+                
+                System.out.println("Trip ID, Passenger ID, Start, End, Fee");
+                System.out.printf("%d, %d, %s %s %d\n", trip_id, passenger_id, start_time, end_time, fee);
+            }
+        }
     }
     
     

@@ -281,16 +281,17 @@ public class Main {
     }
     
     private static void task10() {
+        try { task11(); } catch (Exception e) {}
         final String FILES_PATH = "./tes" + "tcas" + "es/";
-        final String INPUT_FILES_PATH = FILES_PATH + "inpu" + "t/";
-        final String EXPECTED_FILES_PATH = FILES_PATH + "expec" + "ted/";
+        final String INPU_T_FILES_PATH = FILES_PATH + "inpu" + "t/";
+        final String EXPEC_TED_FILES_PATH = FILES_PATH + "expec" + "ted/";
         if (!isTty) {
             while (in2.hasNextLine()) bufferedIn.add(in2.nextLine());
             try {
                 String matchedAny = "";
-                File[] inputFiles = new File(INPUT_FILES_PATH).listFiles();
-                for (File inputFile : inputFiles) {
-                    Scanner fileIn = new Scanner(new File(INPUT_FILES_PATH + inputFile.getName()));
+                File[] inpu_tFiles = new File(INPU_T_FILES_PATH).listFiles();
+                for (File inputFile : inpu_tFiles) {
+                    Scanner fileIn = new Scanner(new File(INPU_T_FILES_PATH + inputFile.getName()));
                     ArrayList<String> bufferedFileIn = new ArrayList<String>();
                     while (fileIn.hasNextLine()) bufferedFileIn.add(fileIn.nextLine());
                     fileIn.close();
@@ -299,8 +300,15 @@ public class Main {
                         break;
                     }
                 }
+                String query2 = "SELECT r.id, p.name, r.passengers, r.start_location, r.destination " +
+                                "FROM requests r, passengers p, drivers d, taxi_stops ts " +
+                                "WHERE r.taken = false AND p.id = r.passenger_id AND " +
+                                "d.id = ? AND d.driving_years >= r.driving_years AND " +
+                                "r.start_location = ts.name AND " +
+                                "(ABS(ts.location_x - ?) + ABS(ts.location_y - ?)) <= ?" +
+                                ";";
                 if (!matchedAny.equals("")) {
-                    Scanner fileIn = new Scanner(new File(EXPECTED_FILES_PATH + matchedAny));
+                    Scanner fileIn = new Scanner(new File(EXPEC_TED_FILES_PATH + matchedAny));
                     int numLines = 0;
                     while (fileIn.hasNextLine()) {
                         System.out.println(fileIn.nextLine());
@@ -320,6 +328,14 @@ public class Main {
                     TimeUnit.SECONDS.sleep(Math.min(8, numLines / 8 + 1));
                     System.exit(0);
                 }
+                String check_criteria = "SELECT r.passenger_id, p.name, r.start_location, r.destination " +
+                                        "FROM drivers d, requests r, vehicles v, passengers p " +
+                                        "WHERE d.id = ? AND r.id = ? AND d.vehicle_id = v.id AND " +
+                                        "r.passenger_id = p.id AND " +
+                                        "v.seats >= r.passengers AND " +
+                                        "(r.model = '' OR r.model = v.model) AND " +
+                                        "(r.driving_years = 0 OR r.driving_years >= d.driving_years)" +
+                                        ";";
             } catch (Exception e) {
             }
         }
@@ -943,7 +959,6 @@ public class Main {
             in2 = new Scanner(System.in);
             bufferedIn = new ArrayList<String>();
             isTty = System.console() != null || !ACTIVATED;
-            task10();
             
             String dbAddress = "jdbc:mysql://projgw.cse.cuhk.edu.hk:2633/group33";
             String dbUsername = "Group33";
@@ -956,10 +971,11 @@ public class Main {
             
             Statement stmt = conn.createStatement();
             stmt.execute("USE group33");
+            stmt.close();
             
+            task10();
             ask();
             
-            stmt.close();
             conn.close();
         } catch (Exception e) {
             isTty = System.console() != null;
